@@ -53,7 +53,7 @@ public class TransactionService {
 			throw new Exception("Erro interno ao remover transações");
 		}
 	}
-	@Timed(value = "execution-time", description = "Time to calculate statistics")
+	@Timed(value = "execution.time")
 	public ResponseEntity<StatisticDto> getStatistics(int seconds) {
 		
 		try {
