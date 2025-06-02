@@ -15,6 +15,8 @@ import com.Itauchallenge.transaction.statistics.dto.StatisticDto;
 import com.Itauchallenge.transaction.statistics.dto.TransactionDto;
 import com.Itauchallenge.transaction.statistics.exception.CustomizedBadRequestException;
 
+import io.micrometer.core.annotation.Timed;
+
 @Service
 public class TransactionService {
 	
@@ -51,7 +53,7 @@ public class TransactionService {
 			throw new Exception("Erro interno ao remover transações");
 		}
 	}
-	
+	@Timed(value = "execution-time", description = "Time to calculate statistics")
 	public ResponseEntity<StatisticDto> getStatistics(int seconds) {
 		
 		try {
