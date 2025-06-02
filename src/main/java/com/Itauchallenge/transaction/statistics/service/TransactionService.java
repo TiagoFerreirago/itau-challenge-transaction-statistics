@@ -19,7 +19,7 @@ public class TransactionService {
 
 	private Queue<TransactionDto> transactionQueue = new ConcurrentLinkedQueue<>();
 	
-	public ResponseEntity<Void> createTransaction(TransactionDto transaction) throws Exception {
+	public ResponseEntity<Void> createTransaction(TransactionDto transaction){
 		
 		try {
 			logger.info("Transanção recebida com sucesso: valor={}, data={}",transaction.getValue(),transaction.getDateTime());
@@ -36,7 +36,7 @@ public class TransactionService {
 		}
 	}
 	
-	public ResponseEntity<Void> removeAllTransactions() throws Exception {
+	public ResponseEntity<Void> deleteAllTransactions(){
 		
 		try {
 			logger.info("Todas as transações foram excluídas com sucesso");
