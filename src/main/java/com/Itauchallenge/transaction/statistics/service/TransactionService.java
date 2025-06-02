@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.Itauchallenge.transaction.statistics.dto.StatisticDto;
 import com.Itauchallenge.transaction.statistics.dto.TransactionDto;
+import com.Itauchallenge.transaction.statistics.exception.CustomizedBadRequestException;
 
 @Service
 public class TransactionService {
@@ -21,7 +22,7 @@ public class TransactionService {
 
 	private Queue<TransactionDto> transactionQueue = new ConcurrentLinkedQueue<>();
 	
-	public ResponseEntity<Void> createTransaction(TransactionDto transaction){
+	public ResponseEntity<Void> createTransaction(TransactionDto transaction) throws Exception {
 		
 		try {
 			logger.info("Transanção recebida com sucesso: valor={}, data={}",transaction.getValue(),transaction.getDateTime());
@@ -34,11 +35,11 @@ public class TransactionService {
 		}
 		catch(Exception e) {
 			logger.error("Erro ao receber uma transação: valor={}, data={}",transaction.getValue(),transaction.getDateTime(),e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			throw new Exception("Erro ao processar a transação");
 		}
 	}
 	
-	public ResponseEntity<Void> deleteAllTransactions(){
+	public ResponseEntity<Void> deleteAllTransactions() throws Exception {
 		
 		try {
 			logger.info("Todas as transações foram excluídas com sucesso");
@@ -47,7 +48,7 @@ public class TransactionService {
 		}
 		catch(Exception e) {
 			logger.error("Erro ao excluir as transações", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			throw new Exception("Erro interno ao remover transações");
 		}
 	}
 	
@@ -61,9 +62,10 @@ public class TransactionService {
 		}
 		catch(Exception e) {
 			logger.error("Erro ao executar as estatísticas",e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			throw new CustomizedBadRequestException("Erro ao calcular estatísticas: "+ e.getMessage());
 		}
 
 	}
+	
 	
 }

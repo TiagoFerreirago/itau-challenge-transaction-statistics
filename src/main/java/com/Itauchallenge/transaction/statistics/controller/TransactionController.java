@@ -24,13 +24,13 @@ public class TransactionController {
 		this.transactionService =transactionService;
 	}
 	@PostMapping
-	public ResponseEntity<Void> receiveTransaction(@Valid @RequestBody TransactionDto transaction){
+	public ResponseEntity<Void> receiveTransaction(@Valid @RequestBody TransactionDto transaction) throws Exception{
 		
 		transactionService.createTransaction(transaction);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 	@DeleteMapping
-	public ResponseEntity<Void> removeAllTransactions(){
+	public ResponseEntity<Void> removeAllTransactions() throws Exception{
 		
 		transactionService.deleteAllTransactions();
 		return ResponseEntity.ok().build();
