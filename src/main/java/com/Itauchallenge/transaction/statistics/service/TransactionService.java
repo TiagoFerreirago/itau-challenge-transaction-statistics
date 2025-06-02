@@ -1,6 +1,7 @@
 package com.Itauchallenge.transaction.statistics.service;
 
 import java.time.OffsetDateTime;
+import java.util.DoubleSummaryStatistics;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.Itauchallenge.transaction.statistics.dto.StatisticDto;
 import com.Itauchallenge.transaction.statistics.dto.TransactionDto;
 
 @Service
@@ -47,6 +49,21 @@ public class TransactionService {
 			logger.error("Erro ao excluir as transações", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
+	}
+	
+	public ResponseEntity<StatisticDto> getStatistics(int seconds) {
+		
+		try {
+			logger.info("As estatísticas foram executadas");
+			DoubleSummaryStatistics  summaryStatistics = transactionQueue.stream().filter(t -> t.getDateTime().isAfter(OffsetDateTime.now().minusSeconds(seconds))).mapToDouble(TransactionDto::getValue).summaryStatistics();
+			StatisticDto dtoStatistics = new StatisticDto(summaryStatistics);
+			return ResponseEntity.ok().body(dtoStatistics);
+		}
+		catch(Exception e) {
+			logger.error("Erro ao executar as estatísticas",e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+
 	}
 	
 }
