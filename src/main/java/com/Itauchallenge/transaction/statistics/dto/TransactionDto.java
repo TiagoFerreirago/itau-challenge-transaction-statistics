@@ -14,6 +14,13 @@ public class TransactionDto {
 	@NotNull
 	private OffsetDateTime dateTime;
 	
+	public TransactionDto() {}
+	
+	public TransactionDto(Double value, OffsetDateTime dateTime) {
+		this.value = value;
+		this.dateTime = dateTime;
+	}
+	
 	public TransactionDto(Transaction transaction) {
 		this.value = transaction.getValue();
 		this.dateTime = transaction.getDateTime();

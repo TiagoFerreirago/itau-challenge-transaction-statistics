@@ -3,7 +3,7 @@ package com.Itauchallenge.transaction.statistics.dto;
 import java.util.DoubleSummaryStatistics;
 import java.util.Objects;
 
-public class StatisticsDto {
+public class StatisticDto {
 
 	private Long count;
 	private Double sum;
@@ -11,12 +11,13 @@ public class StatisticsDto {
 	private Double min;
 	private Double max;
 	
-	public StatisticsDto(DoubleSummaryStatistics statistics) {
-		this.count = statistics.getCount();
-		this.sum = statistics.getSum();
-		this.avg = statistics.getAverage();
-		this.min = statistics.getMin();
-		this.max = statistics.getMax();
+	public StatisticDto() {}
+	public StatisticDto(DoubleSummaryStatistics statistic) {
+		this.count = statistic.getCount();
+		this.sum = statistic.getSum();
+		this.avg = statistic.getAverage();
+		this.min = (statistic.getCount() > 0 ? statistic.getMin() : 0.0);
+		this.max = (statistic.getCount() > 0 ? statistic.getMax() : 0.0);
 	}
 
 	public Long getCount() {
@@ -52,7 +53,7 @@ public class StatisticsDto {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		StatisticsDto other = (StatisticsDto) obj;
+		StatisticDto other = (StatisticDto) obj;
 		return Objects.equals(avg, other.avg) && Objects.equals(count, other.count) && Objects.equals(max, other.max)
 				&& Objects.equals(min, other.min) && Objects.equals(sum, other.sum);
 	}

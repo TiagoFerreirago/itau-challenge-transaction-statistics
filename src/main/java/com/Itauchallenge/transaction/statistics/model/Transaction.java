@@ -3,6 +3,8 @@ package com.Itauchallenge.transaction.statistics.model;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 
+import com.Itauchallenge.transaction.statistics.dto.TransactionDto;
+
 public class Transaction {
 
 	private Double value;
@@ -11,6 +13,11 @@ public class Transaction {
 	public Transaction(Double value, OffsetDateTime dateTime) {
 		this.value = value;
 		this.dateTime = dateTime;
+	}
+	
+	public Transaction(TransactionDto dto) {
+		this.value = dto.getValue();
+		this.dateTime = dto.getDateTime();
 	}
 
 	public Double getValue() {
