@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class StatisticController {
 
 	private TransactionService transactionService;
-	
+		
 	public StatisticController(TransactionService transactionService) {
 		
 		this.transactionService = transactionService;
@@ -32,7 +32,7 @@ public class StatisticController {
 				 @ApiResponse(description = "Bad Request", responseCode = "400", content = @Content),
 				 @ApiResponse(description = "Not Found", responseCode = "404", content = @Content),
 				 @ApiResponse(description = "Internal Server Error", responseCode = "500", content = @Content)})
-	public ResponseEntity<StatisticDto>getStatistics(@RequestParam(value = "seconds", defaultValue = "60") int seconds){
+	public ResponseEntity<StatisticDto> getStatistics(@RequestParam(value = "seconds", defaultValue = "60") int seconds){
 		
 		ResponseEntity<StatisticDto> statistics = transactionService.getStatistics(seconds);
 		return statistics;
