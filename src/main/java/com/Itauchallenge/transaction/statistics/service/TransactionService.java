@@ -27,10 +27,16 @@ public class TransactionService {
 	public ResponseEntity<Void> createTransaction(TransactionDto transaction) throws Exception {
 		
 		try {
-			logger.info("Transanção recebida com sucesso: valor={}, data={}",transaction.getValue(),transaction.getDateTime());
+			if (transaction == null || transaction.getValue() == null || transaction.getDateTime() == null) {
+			    return ResponseEntity.unprocessableEntity().build();
+			}
+			
 			if(transaction.getDateTime().isAfter(OffsetDateTime.now()) || transaction.getValue() < 0) {
 				return ResponseEntity.unprocessableEntity().build();
 			}
+				
+			logger.info("Transanção recebida com sucesso: valor={}, data={}",transaction.getValue(),transaction.getDateTime());
+
 			transactionQueue.offer(transaction);
 			return ResponseEntity.status(HttpStatus.CREATED).build();
 
@@ -56,18 +62,13 @@ public class TransactionService {
 	@Timed(value = "execution.time")
 	public ResponseEntity<StatisticDto> getStatistics(int seconds) {
 		
-		try {
-			logger.info("As estatísticas foram executadas");
-			DoubleSummaryStatistics  summaryStatistics = transactionQueue.stream().filter(t -> t.getDateTime().isAfter(OffsetDateTime.now().minusSeconds(seconds))).mapToDouble(TransactionDto::getValue).summaryStatistics();
+			if (seconds <= 0) {
+			    throw new CustomizedBadRequestException("Não é permitido segundos negativos ou zero");
+			}
+						
+			DoubleSummaryStatistics  summaryStatistics = transactionQueue.stream().filter(t -> !t.getDateTime().isBefore(OffsetDateTime.now().minusSeconds(seconds))).mapToDouble(TransactionDto::getValue).summaryStatistics();
 			StatisticDto dtoStatistics = new StatisticDto(summaryStatistics);
 			return ResponseEntity.ok().body(dtoStatistics);
-		}
-		catch(Exception e) {
-			logger.error("Erro ao executar as estatísticas",e);
-			throw new CustomizedBadRequestException("Erro ao calcular estatísticas: "+ e.getMessage());
-		}
-
 	}
-	
-	
+		
 }

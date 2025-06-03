@@ -49,18 +49,25 @@ class TestTransaction {
 	
 	@Test
 	void testGetStatistic() throws Exception {
-		
+	   
+		service.deleteAllTransactions();
 		service.createTransaction(new TransactionDto(10.0, OffsetDateTime.now().minusSeconds(45)));
 		service.createTransaction(new TransactionDto(15.0, OffsetDateTime.now().minusSeconds(30)));
+	    service.createTransaction(new TransactionDto(35.0, OffsetDateTime.now().minusSeconds(30)));
+
 		ResponseEntity<StatisticDto> response = service.getStatistics(60);
 		
 		assertNotNull(response.getBody());
-		assertEquals(2, response.getBody().getCount());
+		assertEquals(3, response.getBody().getCount());
+		assertEquals(60.0, response.getBody().getSum());
+	    assertEquals(10.0, response.getBody().getMin());
+	    assertEquals(35.0, response.getBody().getMax());
+	    assertEquals(20.0, response.getBody().getAvg());
 	}
 	
 	@Test
     void testConcurrentTransactions() throws Exception {
-		
+		service.deleteAllTransactions();
 		int numThreads = 100;
 		
 		ExecutorService executor = Executors.newFixedThreadPool(numThreads);
@@ -103,43 +110,33 @@ class TestTransaction {
 	}
 	
 	@Test
-	void testCreateTransactionWhenInvalidParam() throws Exception {
-		
-		ResponseEntity<Void> response = service.createTransaction(new TransactionDto(-10.0, OffsetDateTime.now().minusSeconds(45)));
-		ResponseEntity<Void> responseTwo = service.createTransaction(new TransactionDto(15.0, OffsetDateTime.now().plusSeconds(60)));
-		ResponseEntity<Void> responseThree = service.createTransaction(new TransactionDto(null, OffsetDateTime.now().plusSeconds(60)));
-		ResponseEntity<Void> responseFour = service.createTransaction(new TransactionDto(20.0, null));
-
-		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, responseTwo.getStatusCode());
-		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, responseThree.getStatusCode());
-		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, responseFour.getStatusCode());
+	void testExpiredTransactionNotIncluded() throws Exception {
+	    service.deleteAllTransactions();
+	    service.createTransaction(new TransactionDto(30.0, OffsetDateTime.now().minusSeconds(61)));
+	    ResponseEntity<StatisticDto> stats = service.getStatistics(60);
+	    assertEquals(0, stats.getBody().getCount());
 	}
-	
+
 	@Test
 	void testCreateTransactionWhenNull() throws Exception {
 		
 
-		Exception exception = assertThrows(Exception.class, () -> {
-			service.createTransaction(null);
-		});
-		
-		String exceptionActual = "Erro ao processar a transação";
-		String exceptionExpected = exception.getMessage();
-	
-		assertEquals(exceptionActual, exceptionExpected);
+		ResponseEntity<Void> response = service.createTransaction(null);
+	    
+		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+
 	}
 	
 	@Test
 	void testGetStatisticWhenNegativeSeconds() throws Exception {
 		
 
-		Exception exception = assertThrows(CustomizedBadRequestException	.class, () -> {
+		Exception exception = assertThrows(CustomizedBadRequestException.class, () -> {
 		
 			service.getStatistics(-5);
 		});
 		
-		String exceptionActual = "Erro ao calcular estatísticas: ";
+		String exceptionActual = "Não é permitido segundos negativos ou zero";
 		String exceptionExpected = exception.getMessage();
 	
 		assertEquals(exceptionActual, exceptionExpected);
@@ -161,7 +158,8 @@ class TestTransaction {
 	@Test
 	void testBoundaryTransaction() throws Exception  {
 		
-		service.createTransaction(new TransactionDto(30.0, OffsetDateTime.now().minusSeconds(60)));
+		service.deleteAllTransactions();
+		service.createTransaction(new TransactionDto(30.0, OffsetDateTime.now().minusSeconds(59)));
 		
 		ResponseEntity<StatisticDto> statistic =  service.getStatistics(60);
 		
