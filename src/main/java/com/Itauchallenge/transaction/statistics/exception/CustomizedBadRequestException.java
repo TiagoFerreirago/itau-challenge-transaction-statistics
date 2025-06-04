@@ -8,7 +8,11 @@ public class CustomizedBadRequestException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public CustomizedBadRequestException(String msg) {
-		super(msg);
-	}
+
+    public CustomizedBadRequestException() {
+    }
+    
+    public CustomizedBadRequestException(String message) {
+        super(message);
+    }
 }

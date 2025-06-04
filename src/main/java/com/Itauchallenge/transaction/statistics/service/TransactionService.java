@@ -13,8 +13,6 @@ import org.springframework.stereotype.Service;
 
 import com.Itauchallenge.transaction.statistics.dto.StatisticDto;
 import com.Itauchallenge.transaction.statistics.dto.TransactionDto;
-import com.Itauchallenge.transaction.statistics.exception.CustomizedBadRequestException;
-
 import io.micrometer.core.annotation.Timed;
 
 @Service
@@ -24,9 +22,9 @@ public class TransactionService {
 
 	private Queue<TransactionDto> transactionQueue = new ConcurrentLinkedQueue<>();
 	
-	public ResponseEntity<Void> createTransaction(TransactionDto transaction) throws Exception {
+	public ResponseEntity<Void> createTransaction(TransactionDto transaction){
 		
-		try {
+		
 			if (transaction == null || transaction.getValue() == null || transaction.getDateTime() == null) {
 			    return ResponseEntity.unprocessableEntity().build();
 			}
@@ -35,38 +33,33 @@ public class TransactionService {
 				return ResponseEntity.unprocessableEntity().build();
 			}
 				
-			logger.info("Transanção recebida com sucesso: valor={}, data={}",transaction.getValue(),transaction.getDateTime());
+			logger.info("Transação recebida com sucesso: valor={}, data={}",transaction.getValue(),transaction.getDateTime());
 
 			transactionQueue.offer(transaction);
 			return ResponseEntity.status(HttpStatus.CREATED).build();
-
-		}
-		catch(Exception e) {
-			logger.error("Erro ao receber uma transação: valor={}, data={}",transaction.getValue(),transaction.getDateTime(),e);
-			throw new Exception("Erro ao processar a transação");
-		}
+		
 	}
 	
-	public ResponseEntity<Void> deleteAllTransactions() throws Exception {
+	public ResponseEntity<Void> deleteAllTransactions(){
 		
-		try {
+		
 			logger.info("Todas as transações foram excluídas com sucesso");
 			transactionQueue.clear();
+			
 			return ResponseEntity.ok().build();
-		}
-		catch(Exception e) {
-			logger.error("Erro ao excluir as transações", e);
-			throw new Exception("Erro interno ao remover transações");
-		}
 	}
+	
 	@Timed(value = "execution.time")
 	public ResponseEntity<StatisticDto> getStatistics(int seconds) {
 		
 			if (seconds <= 0) {
-			    throw new CustomizedBadRequestException("Não é permitido segundos negativos ou zero");
+				return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
 			}
-						
-			DoubleSummaryStatistics  summaryStatistics = transactionQueue.stream().filter(t -> !t.getDateTime().isBefore(OffsetDateTime.now().minusSeconds(seconds))).mapToDouble(TransactionDto::getValue).summaryStatistics();
+			
+			logger.info("Retornando todas as estatísticas");	
+			DoubleSummaryStatistics  summaryStatistics = transactionQueue.stream()
+					.filter(t -> !t.getDateTime().isBefore(OffsetDateTime.now()
+					.minusSeconds(seconds))).mapToDouble(TransactionDto::getValue).summaryStatistics();
 			StatisticDto dtoStatistics = new StatisticDto(summaryStatistics);
 			return ResponseEntity.ok().body(dtoStatistics);
 	}

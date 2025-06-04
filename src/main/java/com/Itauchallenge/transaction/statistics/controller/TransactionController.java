@@ -36,7 +36,7 @@ public class TransactionController {
 				@ApiResponse(description = "Unauthorized", responseCode = "401", content = @Content),
 				@ApiResponse(description = "Unprocessable Entity", responseCode = "422", content = @Content),
 				@ApiResponse(description = "Internal Server Error", responseCode = "500", content = @Content)})
-	public ResponseEntity<Void> createTransaction(@Valid @RequestBody TransactionDto transaction) throws Exception{
+	public ResponseEntity<Void> createTransaction(@Valid @RequestBody TransactionDto transaction){
 		
 		transactionService.createTransaction(transaction);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -48,7 +48,7 @@ public class TransactionController {
 				  @ApiResponse(description = "Bad Request", responseCode = "400", content = @Content),
 				  @ApiResponse(description = "Unauthorized", responseCode = "401", content = @Content),
 				  @ApiResponse(description = "Internal Server Error", responseCode = "500", content = @Content)})
-	public ResponseEntity<Void> deleteAllTransactions() throws Exception{
+	public ResponseEntity<Void> deleteAllTransactions(){
 		
 		transactionService.deleteAllTransactions();
 		return ResponseEntity.ok().build();
