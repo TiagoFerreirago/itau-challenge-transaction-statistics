@@ -17,10 +17,8 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import com.Itauchallenge.transaction.statistics.dto.StatisticDto;
 import com.Itauchallenge.transaction.statistics.dto.TransactionDto;
-import com.Itauchallenge.transaction.statistics.exception.CustomizedBadRequestException;
 import com.Itauchallenge.transaction.statistics.mock.MockTransaction;
 
 @TestInstance(Lifecycle.PER_CLASS)
@@ -130,16 +128,9 @@ class TestTransaction {
 	@Test
 	void testGetStatisticWhenNegativeSeconds() throws Exception {
 		
-
-		Exception exception = assertThrows(CustomizedBadRequestException.class, () -> {
-		
-			service.getStatistics(-5);
-		});
-		
-		String exceptionActual = "Não é permitido segundos negativos ou zero";
-		String exceptionExpected = exception.getMessage();
+		ResponseEntity<StatisticDto> statistics =	service.getStatistics(-5);
 	
-		assertEquals(exceptionActual, exceptionExpected);
+		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, statistics.getStatusCode());
 	}
 	
 	@Test
